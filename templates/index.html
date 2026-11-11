@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salón de Belleza - Agendamiento Online</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e67e22;
+            --bg-light: #f8f9fa;
+        }
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover {
+            background-color: #1a252f;
+            border-color: #1a252f;
+        }
+        .step-section {
+            display: none;
+        }
+        .step-section.active {
+            display: block;
+        }
+        .time-slot {
+            transition: all 0.2s ease;
+        }
+        .time-slot:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-cut text-warning me-2"></i>SALÓN DE BELLEZA</a>
+            <div id="userNavStatus" class="text-light small"></div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <!-- PASO 1: REGISTRO DE CLIENTE -->
+                <div id="stepRegister" class="card p-4 p-md-5 step-section active">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold">Reserva tu Cita</h2>
+                        <p class="text-muted">Regístrate para ver los servicios y horarios disponibles</p>
+                    </div>
+                    <form id="formRegister">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nombre</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <input type="text" class="form-control" id="regName" placeholder="Ej. Marcela" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Apellidos</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                                    <input type="text" class="form-control" id="regLastName" placeholder="Ej. Gómez" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Número de Teléfono</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                    <input type="tel" class="form-control" id="regPhone" placeholder="+56 9 1234 5678" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Correo Electrónico</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control" id="regEmail" placeholder="correo@ejemplo.com" required>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Continuar al Calendario</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- PASO 2: SELECCIÓN DE SERVICIO Y HORARIO -->
+                <div id="stepBooking" class="card p-4 p-md-5 step-section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold m-0">Elige Servicio y Horario</h3>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="goToStep(1)"><i class="fas fa-arrow-left me-1"></i> Volver</button>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">1. Selecciona el servicio:</label>
+                        <select class="form-select form-select-lg" id="serviceSelect" onchange="updatePrice()">
+                            <option value="Corte de Cabello ($12.000)" data-price="12000">Corte de Cabello - $12.000</option>
+                            <option value="Tinturación / Color ($25.000)" data-price="25000">Tinturación / Color - $25.000</option>
+                            <option value="Brushing y Peinado ($15.000)" data-price="15000">Brushing y Peinado - $15.000</option>
+                            <option value="Manicure Completa ($10.000)" data-price="10000">Manicure Completa - $10.000</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">2. Selecciona el día de la semana:</label>
+                        <div class="btn-group w-100 flex-wrap gap-2 shadow-sm p-1 bg-white rounded" role="group">
+                            <button type="button" class="btn btn-outline-dark active flex-fill" onclick="selectDay(this, 'Lunes')">Lunes</button>
+                            <button type="button" class="btn btn-outline-dark flex-fill" onclick="selectDay(this, 'Martes')">Martes</button>
+                            <button type="button" class="btn btn-outline-dark flex-fill" onclick="selectDay(this, 'Miércoles')">Miércoles</button>
+                            <button type="button" class="btn btn-outline-dark flex-fill" onclick="selectDay(this, 'Jueves')">Jueves</button>
+                            <button type="button" class="btn btn-outline-dark flex-fill" onclick="selectDay(this, 'Viernes')">Viernes</button>
+                            <button type="button" class="btn btn-outline-dark flex-fill" onclick="selectDay(this, 'Sábado')">Sábado</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">3. Horas disponibles para <span id="selectedDayText" class="text-primary">Lunes</span>:</label>
+                        <div class="row g-2 text-center" id="timeSlotsContainer">
+                            <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 time-slot py-2" onclick="selectTime(this, '10:00 AM')">10:00 AM</button></div>
+                            <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 time-slot py-2" onclick="selectTime(this, '11:30 AM')">11:30 AM</button></div>
+                            <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 time-slot py-2" onclick="selectTime(this, '03:00 PM')">03:00 PM</button></div>
+                            <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 time-slot py-2" onclick="selectTime(this, '04:30 PM')">04:30 PM</button></div>
+                            <div class="col-4"><button type="button" class="btn btn-outline-secondary w-100 time-slot py-2 disabled">06:00 PM <small>(Ocupado)</small></button></div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary w-100 py-2 fw-semibold" id="btnNextToPayment" disabled onclick="goToPaymentStep()">Revisar y Pagar</button>
+                </div>
+
+                <!-- PASO 2.5: RESUMEN Y PAGO SEGURO -->
+                <div id="stepPayment" class="card p-4 p-md-5 step-section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold m-0">Resumen y Pago</h3>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="goToStep(2)"><i class="fas fa-arrow-left me-1"></i> Volver</button>
+                    </div>
+
+                    <div class="bg-light p-3 rounded mb-4">
+                        <ul class="list-unstyled mb-0 small">
+                            <li class="mb-2"><strong>Cliente:</strong> <span id="payClientName"></span></li>
+                            <li class="mb-2"><strong>Teléfono:</strong> <span id="payClientPhone"></span></li>
+                            <li class="mb-2"><strong>Servicio:</strong> <span id="payServiceName"></span></li>
+                            <li class="mb-2"><strong>Fecha y Hora:</strong> <span id="payDateTime"></span></li>
+                            <li class="mb-2 border-top pt-2 mt-2 fs-6"><strong>Total a Pagar:</strong> <span class="text-success fw-bold" id="payTotalAmount">$12.000 CLP</span></li>
+                        </ul>
+                    </div>
+
+                    <button type="button" class="btn btn-success w-100 py-3 fw-bold fs-5 shadow-sm" onclick="simulateMercadoPago()">
+                        <i class="fas fa-lock me-2"></i> Pagar con Mercado Pago / Tarjetas
+                    </button>
+                </div>
+
+                <!-- PASO 3: CONFIRMACIÓN EXITOSA -->
+                <div id="stepSuccess" class="card p-4 p-md-5 text-center step-section">
+                    <div class="mb-3 text-success">
+                        <i class="fas fa-check-circle fa-4x"></i>
+                    </div>
+                    <h2 class="fw-bold mb-2">¡Cita Agendada y Pagada con Éxito!</h2>
+                    <p class="text-muted mb-4">El comprobante ha sido registrado y enviado al correo.</p>
+                    <button class="btn btn-primary px-4" onclick="location.reload()">Agendar otra cita</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let clientData = {};
+        let selectedDay = "Lunes";
+        let selectedTime = null;
+        let selectedServicePrice = 12000;
+
+        document.getElementById('formRegister').addEventListener('submit', function(e) {
+            e.preventDefault();
+            clientData.name = document.getElementById('regName').value;
+            clientData.lastName = document.getElementById('regLastName').value;
+            clientData.phone = document.getElementById('regPhone').value;
+            clientData.email = document.getElementById('regEmail').value;
+
+            document.getElementById('userNavStatus').innerHTML = `<i class="fas fa-user-circle me-1"></i> ${clientData.name}`;
+            goToStep(2);
+        });
+
+        function goToStep(stepNumber) {
+            document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
+            if(stepNumber === 1) document.getElementById('stepRegister').classList.add('active');
+            if(stepNumber === 2) document.getElementById('stepBooking').classList.add('active');
+            if(stepNumber === 2.5) {
+                document.getElementById('stepPayment').classList.add('active');
+                document.getElementById('payClientName').innerText = `${clientData.name} ${clientData.lastName}`;
+                document.getElementById('payClientPhone').innerText = clientData.phone;
+                
+                const select = document.getElementById('serviceSelect');
+                document.getElementById('payServiceName').innerText = select.value;
+                document.getElementById('payDateTime').innerText = `${selectedDay} a las ${selectedTime}`;
+                document.getElementById('payTotalAmount').innerText = `$${selectedServicePrice.toLocaleString('es-CL')} CLP`;
+            }
+            if(stepNumber === 3) document.getElementById('stepSuccess').classList.add('active');
+        }
+
+        function updatePrice() {
+            const select = document.getElementById('serviceSelect');
+            selectedServicePrice = parseInt(select.options[select.selectedIndex].getAttribute('data-price'));
+        }
+
+        function selectDay(element, dayName) {
+            selectedDay = dayName;
+            document.getElementById('selectedDayText').innerText = dayName;
+            element.parentElement.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function selectTime(element, time) {
+            if(element.classList.contains('disabled')) return;
+            document.querySelectorAll('.time-slot').forEach(b => {
+                if(!b.classList.contains('disabled')) {
+                    b.classList.remove('btn-success', 'text-white');
+                    b.classList.add('btn-outline-primary');
+                }
+            });
+            element.classList.remove('btn-outline-primary');
+            element.classList.add('btn-success', 'text-white');
+            selectedTime = time;
+            document.getElementById('btnNextToPayment').disabled = false;
+        }
+
+        function goToPaymentStep() {
+            goToStep(2.5);
+        }
+
+        function simulateMercadoPago() {
+            alert("Conectando con pasarela segura de Mercado Pago...");
+            setTimeout(() => {
+                goToStep(3);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
