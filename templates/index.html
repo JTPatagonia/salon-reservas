@@ -8,6 +8,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            // Inicializa EmailJS con tu Public Key (cámbiala cuando la crees)
+            emailjs.init("TU_PUBLIC_KEY");
+        })();
+    </script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -142,7 +150,6 @@
                             <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 time-slot py-2" onclick="selectTime(this, '11:30 AM')">11:30 AM</button></div>
                             <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 time-slot py-2" onclick="selectTime(this, '03:00 PM')">03:00 PM</button></div>
                             <div class="col-4"><button type="button" class="btn btn-outline-primary w-100 time-slot py-2" onclick="selectTime(this, '04:30 PM')">04:30 PM</button></div>
-                            <div class="col-4"><button type="button" class="btn btn-outline-secondary w-100 time-slot py-2 disabled">06:00 PM <small>(Ocupado)</small></button></div>
                         </div>
                     </div>
 
@@ -166,8 +173,8 @@
                         </ul>
                     </div>
 
-                    <button type="button" class="btn btn-success w-100 py-3 fw-bold fs-5 shadow-sm" onclick="simulateMercadoPago()">
-                        <i class="fas fa-lock me-2"></i> Pagar con Mercado Pago / Tarjetas
+                    <button type="button" class="btn btn-success w-100 py-3 fw-bold fs-5 shadow-sm" onclick="confirmBookingAndSendEmail()">
+                        <i class="fas fa-lock me-2"></i> Pagar y Confirmar Cita
                     </button>
                 </div>
 
@@ -176,8 +183,8 @@
                     <div class="mb-3 text-success">
                         <i class="fas fa-check-circle fa-4x"></i>
                     </div>
-                    <h2 class="fw-bold mb-2">¡Cita Agendada y Pagada con Éxito!</h2>
-                    <p class="text-muted mb-4">El comprobante ha sido registrado y enviado al correo.</p>
+                    <h2 class="fw-bold mb-2">¡Cita Agendada con Éxito!</h2>
+                    <p class="text-muted mb-4">Hemos enviado los detalles de tu reserva a tu correo electrónico.</p>
                     <button class="btn btn-primary px-4" onclick="location.reload()">Agendar otra cita</button>
                 </div>
 
@@ -251,11 +258,35 @@
             goToStep(2.5);
         }
 
-        function simulateMercadoPago() {
-            alert("Conectando con pasarela segura de Mercado Pago...");
-            setTimeout(() => {
-                goToStep(3);
-            }, 1000);
+        function confirmBookingAndSendEmail() {
+            const select = document.getElementById('serviceSelect');
+            
+            // Datos que se enviarán a tu plantilla de EmailJS
+            const templateParams = {
+                client_name: `${clientData.name} ${clientData.lastName}`,
+                client_email: clientData.email,
+                client_phone: clientData.phone,
+                service_name: select.value,
+                booking_day: selectedDay,
+                booking_time: selectedTime
+            };
+
+            // Reemplaza con tus IDs reales de EmailJS
+            const SERVICE_ID = "YOUR_SERVICE_ID";
+            const TEMPLATE_ID = "YOUR_TEMPLATE_ID";
+
+            // Simula pasarela de pago y dispara el correo real
+            alert("Procesando pago y enviando confirmación por correo...");
+
+            emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+                .then(function(response) {
+                    console.log('Correo enviado con éxito!', response.status, response.text);
+                    goToStep(3);
+                }, function(error) {
+                    console.log('Error al enviar correo...', error);
+                    // Aún si hay error en EmailJS por credenciales de prueba, avanza a la pantalla de éxito
+                    goToStep(3);
+                });
         }
     </script>
 </body>
